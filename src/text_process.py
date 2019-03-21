@@ -23,7 +23,7 @@ def extract_POS(input_file):
     # print('%'*40)
     # print(token)
     tags = nltk.pos_tag(token)
-
+    # print(tags)
     dic = {}
     for word,tag in tags:
         if tag not in dic:

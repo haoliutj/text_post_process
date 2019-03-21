@@ -11,6 +11,7 @@ class Sentence(object):
         self.object = object[1]
 
 
+
 def peek(word_list):
     if word_list:
         word = word_list[0]
@@ -77,3 +78,11 @@ def parse_sentence(word_list):
         return parse_subject(word_list, ('noun', 'player'))
     else:
         raise ParserError("Must start with subject, object, or verb not: %s" % start)
+
+
+
+if __name__ == '__main__':
+
+    word_list = [('verb','like'),('noun','you'),('verb','play'),('noun','basketball')]
+    t = parse_sentence(word_list)
+    print(t)
