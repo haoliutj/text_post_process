@@ -38,7 +38,6 @@ def get_word_synonyms_from_sent(word, sent):
     sent_token = nltk.word_tokenize(sent)
     for synset in wordnet.synsets(word):
         for lemma in synset.lemma_names():
-            print(lemma)
             if lemma in sent_token and lemma != word:
                 word_synonyms.append(lemma)
     return word_synonyms
@@ -74,9 +73,7 @@ def replacement(keywordlist,sent):
     for word in keywordlist:
         sent_tags = extract_POS(sent)
         allkey = sent_tags.keys()
-        print(word)
         word_synonyms = get_word_synonyms_from_sent(word,sent)
-        print(word_synonyms)
         if word_synonyms != []:
             sent = sent.replace(random.choice(word_synonyms),word,1)
             i += 1
