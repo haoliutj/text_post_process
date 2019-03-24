@@ -1,8 +1,9 @@
-
+import sent_process
 import nltk
 
 from nltk.corpus import wordnet
 import random
+
 
 
 def read_file(filename):
@@ -69,7 +70,9 @@ def caps_I(sent):
 
 def replacement(keywordlist,sent):
     i = 0
+    j = 0
     sent = caps_I(sent)
+    rest_word = []
     for word in keywordlist:
         sent_tags = extract_POS(sent)
         allkey = sent_tags.keys()
@@ -94,12 +97,19 @@ def replacement(keywordlist,sent):
                         sent = sent.replace(substitute,word,1)
                         i += 1
                 else:
-                    sent = sent + ' ' + word
-                    i += 1
+                    # sent = sent + ' ' + word
+                    rest_word.append(word)
+                    j += 1
             else:
-                sent = sent + ' ' + word
-                i += 1
+                # sent = sent + ' ' + word
+                rest_word.append(word)
+                j += 1
+    print(rest_word)
+    sent_rest = sent_process.main(' '.join(rest_word))
+    print(sent_rest)
+    sent = sent + sent_rest
     print('There are {} times of replacement.'.format(i))
+    print('There are {} rest words need to be re-processed.'.format(j))
     return sent
 
 

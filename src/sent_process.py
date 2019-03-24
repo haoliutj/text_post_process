@@ -157,10 +157,10 @@ def concatnate_words(uh,dts,jj,subs,pred,conj,objs,marks):
     return sent
 
 
-def main():
-    input = 'lawyer seen property operational determine.'
+def main(input):
+
     dic = extract_POS(input)
-    print(dic)
+    # print(dic)
     uh = parse_interjection(dic)
     dts = parse_determiner(dic)
     jj = parse_adjective(dic)
@@ -171,9 +171,11 @@ def main():
     marks = parse_comma(dic)
     sent = concatnate_words(uh,dts,jj,subs,pred,conj,objs,marks)
     sent = ' '.join(sent)
-    print(sent)
+    return sent
+    # print(sent)
 
 
 
 if __name__ == '__main__':
-    main()
+    input = 'lawyer seen property operational determine.'
+    main(input)
