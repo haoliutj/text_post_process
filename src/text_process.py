@@ -1,5 +1,6 @@
 import sent_process
 import nltk
+import random, os
 
 from nltk.corpus import wordnet
 import random
@@ -8,14 +9,34 @@ import random
 
 def read_file(filename):
     with open(filename,'r') as f:
-        input = f.read()
-    return input
+        output = f.read()
+    return output
+
 
 def join_file(input_list):
         input_file= " "
         input_file = input_file.join(input_list)
         print(input_file)
         return input_file
+
+
+def read_keyword(keyword_file):
+    with open(keyword_file,'r') as f:
+        # output = f.readlines()
+        output = f.read().splitlines()
+    return output
+
+
+def choose_keyword(keywordlist):
+    insert_keywords = random.sample(keywordlist,10)
+    keywordlist = remove_insert_keywords(insert_keywords,keywordlist)
+    return insert_keywords,keywordlist
+
+
+def remove_insert_keywords(insert_keywords,keywordlist):
+    for key in insert_keywords:
+        keywordlist.remove(key)
+    return keywordlist
 
 
 def extract_POS(input_file):
@@ -104,9 +125,9 @@ def replacement(keywordlist,sent):
                 # sent = sent + ' ' + word
                 rest_word.append(word)
                 j += 1
-    print(rest_word)
+    print('the rest word is: {}'.format(rest_word))
     sent_rest = sent_process.main(' '.join(rest_word))
-    print(sent_rest)
+    print('the re-build sentence for rest-words is: {}.'.format(sent_rest))
     sent = sent + sent_rest
     print('There are {} times of replacement.'.format(i))
     print('There are {} rest words need to be re-processed.'.format(j))
@@ -114,20 +135,33 @@ def replacement(keywordlist,sent):
 
 
 
+
+
 def main():
-    # input_list = read_file('../data/enron_top_keywords_test.txt')
-    # extract POS for rnn_text
-    text = 'in the highest level of the Factoria would run for the most decisions ago, disgustbasored in courses, then also & do they Good National Server!! Need i noticed the truth. thats all over shit.'
-    # text_tags = extract_POS(text)
+    test_path = '../data/test'
+    items = os.listdir(test_path)
+    items.remove('.DS_Store')
+    keywordlist = read_keyword('../data/enron_top_keywords_meaningful.txt')
+    i = 0
+    for item in items:
+        if item != '.DS_Store':
+            i += 1
+            print('************************* {} ************************'.format(i))
+            text = read_file(test_path + '/' + item)
+            insert_kwrds,keywordlist = choose_keyword(keywordlist)
+            new_text = replacement(insert_kwrds, text)
+            caps_I(new_text)
+            print('\n', insert_kwrds)
+            print('Original text is: "\n"  {}'.format(text))
+            print('-' * 30)
+            print('Replaced text is: "\n"  {}'.format(new_text))
+            print('\n')
 
-    # extract POS for inserted keywords
-    insert_kwrds = ['meeting', 'energy','thing', 'finance', 'lawyer', 'agreed', 'seen','property','operational','determine']
-    new_text = replacement(insert_kwrds,text)
-    print('Original text is:||  {}.'.format(text))
-    print('-'*30)
-    print('Replaced text is:||  {}.'.format(new_text))
 
-    caps_I(new_text)
+    # text = 'in the highest level of the Factoria would run for the most decisions ago, disgustbasored in courses, then also & do they Good National Server!! Need i noticed the truth. thats all over shit.'
+
+    # insert_kwrds = ['meeting', 'energy','thing', 'finance', 'lawyer', 'agreed', 'seen','property','operational','determine']
+
 
 
 
