@@ -1,15 +1,10 @@
-import nltk
+a = 1
+b =0
 
-t = "wowm, oh, I you she he her they their."
-token = nltk.word_tokenize(t)
-tags = nltk.pos_tag(token)
-print(tags)
-
-h = ['i']
-if h:
-    print('not empty')
+if a == 1:
+    print(a)
+elif b ==0:
+    print(b)
 else:
     print('empty')
-
-
 

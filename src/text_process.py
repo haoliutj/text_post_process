@@ -27,8 +27,8 @@ def read_keyword(keyword_file):
     return output
 
 
-def choose_keyword(keywordlist):
-    insert_keywords = random.sample(keywordlist,10)
+def choose_keyword(keywordlist,n):
+    insert_keywords = random.sample(keywordlist,n)
     keywordlist = remove_insert_keywords(insert_keywords,keywordlist)
     return insert_keywords,keywordlist
 
@@ -62,7 +62,19 @@ def get_word_synonyms_from_sent(word, sent):
         for lemma in synset.lemma_names():
             if lemma in sent_token and lemma != word:
                 word_synonyms.append(lemma)
+    print('synonyms are {}'.format(word_synonyms))
     return word_synonyms
+
+
+def get_word_antonym_from_sent(word,sent):
+    word_antonyms = []
+    sent_token = nltk.word_tokenize(sent)
+    for synset in wordnet.synsets(word):
+        for lemma in synset.lemmas():
+            if lemma.antonyms():
+                # if lemma.antonyms()[0].name() in sent_token:
+                    word_antonyms.append(lemma.antonyms()[0].name())
+    print('antonyms are {}'.format(word_antonyms))
 
 
 def check_substitution_list(keywrdlist,candidates):
@@ -98,8 +110,12 @@ def replacement(keywordlist,sent):
         sent_tags = extract_POS(sent)
         allkey = sent_tags.keys()
         word_synonyms = get_word_synonyms_from_sent(word,sent)
+        word_antonyms = get_word_antonym_from_sent(word,sent)
         if word_synonyms != []:
             sent = sent.replace(random.choice(word_synonyms),word,1)
+            i += 1
+        elif word_antonyms:
+            sent = sent.replace(random.choice(word_antonyms), word, 1)
             i += 1
         else:
             tmp = []
@@ -148,7 +164,8 @@ def main():
             i += 1
             print('************************* {} ************************'.format(i))
             text = read_file(test_path + '/' + item)
-            insert_kwrds,keywordlist = choose_keyword(keywordlist)
+            insert_kwrds,keywordlist = choose_keyword(keywordlist,20)
+            print('the length of keywords_list is: {}'.format(len(keywordlist)))
             new_text = replacement(insert_kwrds, text)
             caps_I(new_text)
             print('\n', insert_kwrds)
