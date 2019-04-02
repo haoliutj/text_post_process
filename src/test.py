@@ -1,10 +1,13 @@
-a = 1
-b =0
+import nltk
 
-if a == 1:
-    print(a)
-elif b ==0:
-    print(b)
-else:
-    print('empty')
+y = 'you are teenager'
+y_tokens = nltk.word_tokenize(y)
+for i in range(len(y_tokens)):
+    if y_tokens[i] == 'are':
+        y_tokens[i] = 'and'
+a = ' '.join(y_tokens)
 
+ss = y.replace('are','and',1)
+
+print(ss)
+print(y_tokens)

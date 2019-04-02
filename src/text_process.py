@@ -1,9 +1,13 @@
 import sent_process
 import nltk
-import random, os
+import random, os,copy
 
 from nltk.corpus import wordnet
 import random
+import nltk.stem as ns
+import nltk.stem.porter as pt
+import nltk.stem.lancaster as lc
+
 
 
 
@@ -57,8 +61,9 @@ def extract_POS(input_file):
 
 def get_word_synonyms_from_sent(word, sent):
     word_synonyms = []
+    word_stem = word_lemmatizer(word)
     sent_token = nltk.word_tokenize(sent)
-    for synset in wordnet.synsets(word):
+    for synset in wordnet.synsets(word_stem):
         for lemma in synset.lemma_names():
             if lemma in sent_token and lemma != word:
                 word_synonyms.append(lemma)
@@ -68,13 +73,15 @@ def get_word_synonyms_from_sent(word, sent):
 
 def get_word_antonym_from_sent(word,sent):
     word_antonyms = []
+    word_stem = word_lemmatizer(word)
     sent_token = nltk.word_tokenize(sent)
-    for synset in wordnet.synsets(word):
+    for synset in wordnet.synsets(word_stem):
         for lemma in synset.lemmas():
             if lemma.antonyms():
                 # if lemma.antonyms()[0].name() in sent_token:
                     word_antonyms.append(lemma.antonyms()[0].name())
     print('antonyms are {}'.format(word_antonyms))
+    return word_antonyms
 
 
 def check_substitution_list(keywrdlist,candidates):
@@ -101,22 +108,76 @@ def caps_I(sent):
     return sent
 
 
+def word_lemmatizer(word):
+    "stem words"
+    lc_stemmer = lc.LancasterStemmer()
+    lc_stem = lc_stemmer.stem(word)
+    return lc_stem
+
+
+def word_replace(old,new,sent):
+    sent_tokens = nltk.word_tokenize(sent)
+    for i in range(len(sent_tokens)):
+        if sent_tokens[i] == old:
+            sent_tokens[i] == new
+            break
+    sent = ' '.join(sent_tokens)
+    return sent
+
+
+
+def visual_similar_word(word, sent_token, len_threshold, similar_threshold):
+    "1st and last letter should be exact same"
+    visual_similar_word = []
+    if len(word) < len_threshold:
+        return visual_similar_word,sent_token
+    else:
+        for word_sent in sent_token:
+            count = 0
+            length = len(word)
+            if len(word_sent) == length:
+                if word_sent[0] == word[0] and word_sent[length - 1] == word[length - 1]:
+                    for i in range(1,length-2):
+                        if word_sent[i] == word[i]:
+                            count += 1
+                    similar_ratio = float(count)/float(length)
+                    if similar_ratio >= similar_threshold:
+                        similar_word_tupe = (word_sent,similar_ratio)
+                        visual_similar_word.append(similar_word_tupe)
+        visual_similar_word = sorted(visual_similar_word,key=lambda x:(x[1]))
+        if visual_similar_word:
+            most_visual_similar_word = visual_similar_word[0][0]
+            sent_token.remove(most_visual_similar_word)
+        else:
+            most_visual_similar_word = visual_similar_word
+        return most_visual_similar_word, sent_token
+
+
 def replacement(keywordlist,sent):
     i = 0
     j = 0
+    e = 0
     sent = caps_I(sent)
     rest_word = []
+    sent_tokens = nltk.word_tokenize(sent)
     for word in keywordlist:
         sent_tags = extract_POS(sent)
         allkey = sent_tags.keys()
         word_synonyms = get_word_synonyms_from_sent(word,sent)
         word_antonyms = get_word_antonym_from_sent(word,sent)
+        most_visual_similar_word,sent_tokens = visual_similar_word(word,sent_tokens,4,0.5)
         if word_synonyms != []:
-            sent = sent.replace(random.choice(word_synonyms),word,1)
+            # sent = sent.replace(random.choice(word_synonyms),word,1)
+            sent = word_replace(random.choice(word_synonyms),word,sent)
             i += 1
         elif word_antonyms:
-            sent = sent.replace(random.choice(word_antonyms), word, 1)
+            # sent = sent.replace(random.choice(word_antonyms), word, 1)
+            sent = word_replace(random.choice(word_antonyms), word,sent)
             i += 1
+        elif most_visual_similar_word:
+            sent = word_replace(most_visual_similar_word,word,sent)
+            i += 1
+            e += 1
         else:
             tmp = []
             tmp.append(word)
@@ -144,8 +205,9 @@ def replacement(keywordlist,sent):
     print('the rest word is: {}'.format(rest_word))
     sent_rest = sent_process.main(' '.join(rest_word))
     print('the re-build sentence for rest-words is: {}.'.format(sent_rest))
-    sent = sent + sent_rest
+    sent = sent + ' ' + sent_rest
     print('There are {} times of replacement.'.format(i))
+    print('There are {} times of visual_similar replacement.'.format(e))
     print('There are {} rest words need to be re-processed.'.format(j))
     return sent
 
